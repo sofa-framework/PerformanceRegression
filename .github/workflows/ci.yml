@@ -30,7 +30,7 @@ jobs:
       - name: Setup environment
         shell: bash
         run: |
-          if [[ "${{ github.event_name}}" == "workflow_dispatch" ]]; then 
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then 
             echo "TEST_BRANCH=${{ inputs.branch }}" | tee -a $GITHUB_ENV
             echo "TEST_COMMIT_HASH=${{ inputs.commit_hash }}" | tee -a $GITHUB_ENV
           else
@@ -38,8 +38,21 @@ jobs:
             echo "TEST_COMMIT_HASH=${{ github.event.client_payload.commit_hash }}" | tee -a $GITHUB_ENV
           fi
 
+      - name: Notify commit begin
+        if: github.event_name == 'repository_dispatch'
+        shell: bash
+        run: |
+          curl -L \
+            -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            https://api.github.com/repos/sofa-framework/sofa/statuses/${{ inputs.commit_hash }} \
+            -d '{"state":"pending","target_url":"https://github.com/sofa-framework/PerformanceRegression/actions/runs/${{ github.run_id }}","description":"Performance testing started...","context":"performance-tests"}'
+
       - name: Run performance tests
         id: run_perf_tests
+        continue-on-error: true
         shell: bash
         run: |
           export RO_GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
@@ -50,6 +63,25 @@ jobs:
         with:
           name: ${{ inputs.branch }}_${{ inputs.commit_hash }}
           path: logs
+
+      - name: Notify commit end
+        if: github.event_name == 'repository_dispatch'
+        shell: bash
+        run: |
+          
+          if [[ "${{ steps.run_perf_tests.outcome }}" == "success" ]]; then 
+            STATE="success"
+          else
+            STATE="failure"
+          fi
+          
+          curl -L \
+            -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            https://api.github.com/repos/sofa-framework/sofa/statuses/${{ inputs.commit_hash }} \
+            -d '{"state":"${STATE}","target_url":"https://github.com/sofa-framework/PerformanceRegression/actions/runs/${{ github.run_id }}","description":"Performance testing started...","context":"performance-tests"}'
 
       - name: Push results
         if: steps.run_perf_tests.outcome == 'success'
