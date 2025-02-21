@@ -1,0 +1,32 @@
+version: '3.7'
+services:
+
+  local:
+    build: 
+      context: ./
+    container_name: ${COMPOSE_PROJECT_NAME}
+    hostname: ${COMPOSE_PROJECT_NAME}
+    restart: always
+    ports:
+      - 5000:80
+    networks:
+      - network 
+    volumes:
+      - ../../:/workdir
+    environment:
+      - RO_GITHUB_TOKEN=$RO_GITHUB_TOKEN
+  redis:
+    image: "bakpaul/sofa-dashboard"
+    restart: always
+    ports:
+      - 5000:80
+    networks:
+      - network
+    volumes:
+      - ../../:/workdir
+    environment:
+      - RO_GITHUB_TOKEN=$RO_GITHUB_TOKEN
+      
+networks:
+  network:
+    driver: bridge

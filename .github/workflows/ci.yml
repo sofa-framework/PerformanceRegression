@@ -1,0 +1,64 @@
+name: Launch the performance test
+
+
+permissions:
+  contents: write
+on:
+  workflow_dispatch:
+    inputs:
+        branch:
+          description: 'Branch to test'
+          required: true
+          default: 'master'
+          type: string
+        commit_hash:
+          description: 'Commit hash on the branch, if not specified thent he latest is taken'
+          required: false
+          type: string
+  repository_dispatch:
+
+
+jobs:
+  run:
+    runs-on: self-hosted
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          path: ./PerformanceRegression
+      
+      - name: Setup environment
+        shell: bash
+        run: |
+          if [[ "${{ github.event_name}}" == "workflow_dispatch" ]]; then 
+            echo "TEST_BRANCH=${{ inputs.branch }}" | tee -a $GITHUB_ENV
+            echo "TEST_COMMIT_HASH=${{ inputs.commit_hash }}" | tee -a $GITHUB_ENV
+          else
+            echo "TEST_BRANCH=${{ github.event.client_payload.branch }}" | tee -a $GITHUB_ENV
+            echo "TEST_COMMIT_HASH=${{ github.event.client_payload.commit_hash }}" | tee -a $GITHUB_ENV
+          fi
+
+      - name: Run performance tests
+        id: run_perf_tests
+        shell: bash
+        run: |
+          export RO_GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
+          bash ./PerformanceRegression/main.sh $(pwd) $TEST_BRANCH $TEST_COMMIT_HASH
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4.4.0
+        with:
+          name: ${{ inputs.branch }}_${{ inputs.commit_hash }}
+          path: logs
+
+      - name: Push results
+        if: steps.run_perf_tests.outcome == 'success'
+        run: |
+          cd PerformanceRegression
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add old_results/*
+          git commit -m "Add performance stats for $TEST_BRANCH $TEST_COMMIT_HASH"
+          git pull -r
+          git push
+      

@@ -1,0 +1,178 @@
+diff --git a/Sofa/Component/AnimationLoop/src/sofa/component/animationloop/FreeMotionAnimationLoop.cpp b/Sofa/Component/AnimationLoop/src/sofa/component/animationloop/FreeMotionAnimationLoop.cpp
+index 645ca99947..67290b280b 100644
+--- a/Sofa/Component/AnimationLoop/src/sofa/component/animationloop/FreeMotionAnimationLoop.cpp
++++ b/Sofa/Component/AnimationLoop/src/sofa/component/animationloop/FreeMotionAnimationLoop.cpp
+@@ -268,17 +268,25 @@ void FreeMotionAnimationLoop::step(const sofa::core::ExecParams* params, SReal d
+             l_constraintSolver->solveConstraint(&cparams, pos, vel);
+         }
+ 
+-        MultiVecDeriv cdx(&vop, l_constraintSolver->getDx());
+-        mop.projectResponse(cdx);
+-        mop.propagateDx(cdx, true);
++        {
++            SCOPED_TIMER("ProjectAndPropagateDx");
++
++            MultiVecDeriv cdx(&vop, l_constraintSolver->getDx());
++            mop.projectResponse(cdx);
++            mop.propagateDx(cdx, true);
++        }
+     }
+ 
+     MechanicalEndIntegrationVisitor endVisitor(params, dt);
+     node->execute(&endVisitor);
+ 
+-    mop.projectPositionAndVelocity(pos, vel);
+-    mop.propagateXAndV(pos, vel);
+-    
++    {
++        SCOPED_TIMER("ProjectAndPropagateXAndV");
++
++        mop.projectPositionAndVelocity(pos, vel);
++        mop.propagateXAndV(pos, vel);
++    }
++
+     node->setTime ( startTime + dt );
+     node->execute<UpdateSimulationContextVisitor>(params);  // propagate time
+ 
+diff --git a/Sofa/Component/Constraint/Lagrangian/Solver/src/sofa/component/constraint/lagrangian/solver/GenericConstraintSolver.cpp b/Sofa/Component/Constraint/Lagrangian/Solver/src/sofa/component/constraint/lagrangian/solver/GenericConstraintSolver.cpp
+index 16d1e17e83..0d57ef79be 100644
+--- a/Sofa/Component/Constraint/Lagrangian/Solver/src/sofa/component/constraint/lagrangian/solver/GenericConstraintSolver.cpp
++++ b/Sofa/Component/Constraint/Lagrangian/Solver/src/sofa/component/constraint/lagrangian/solver/GenericConstraintSolver.cpp
+@@ -516,7 +516,6 @@ void GenericConstraintSolver::applyMotionCorrection(
+ 
+ void GenericConstraintSolver::computeAndApplyMotionCorrection(const core::ConstraintParams* cParams, MultiVecId res1, MultiVecId res2) const
+ {
+-    SCOPED_TIMER("Compute And Apply Motion Correction");
+ 
+     static constexpr auto supportedCorrections = {
+         sofa::core::ConstraintOrder::POS_AND_VEL,
+@@ -532,11 +531,11 @@ void GenericConstraintSolver::computeAndApplyMotionCorrection(const core::Constr
+         for (const auto& constraintCorrection : filteredConstraintCorrections())
+         {
+             {
+-                SCOPED_TIMER("ComputeCorrection");
++                SCOPED_TIMER("doComputeCorrection");
+                 constraintCorrection->computeMotionCorrectionFromLambda(cParams, this->getDx(), &current_cp->f);
+             }
+ 
+-            SCOPED_TIMER("ApplyCorrection");
++            SCOPED_TIMER("doApplyCorrection");
+             applyMotionCorrection(cParams, xId, vId, constraintCorrection);
+         }
+     }
+diff --git a/Sofa/Component/ODESolver/Backward/src/sofa/component/odesolver/backward/EulerImplicitSolver.cpp b/Sofa/Component/ODESolver/Backward/src/sofa/component/odesolver/backward/EulerImplicitSolver.cpp
+index f0b2cab56c..08e3ee6955 100644
+--- a/Sofa/Component/ODESolver/Backward/src/sofa/component/odesolver/backward/EulerImplicitSolver.cpp
++++ b/Sofa/Component/ODESolver/Backward/src/sofa/component/odesolver/backward/EulerImplicitSolver.cpp
+@@ -120,49 +120,52 @@ void EulerImplicitSolver::solve(const core::ExecParams* params, SReal dt, sofa::
+         msg_info() << "EulerImplicitSolver, initial f = " << f;
+     }
+ 
+-    sofa::helper::AdvancedTimer::stepBegin("ComputeRHTerm");
+-    if( firstOrder )
+     {
+-        b.eq(f);
+-    }
+-    else
+-    {
+-        // new more powerful visitors
++        SCOPED_TIMER("ComputeRHTerm");
++        if( firstOrder )
++        {
++            b.eq(f);
++        }
++        else
++        {
++            // new more powerful visitors
+ 
+-        // force in the current configuration
+-        b.eq(f,1.0/tr);                                                                         // b = f0
++            // force in the current configuration
++            b.eq(f,1.0/tr);                                                                         // b = f0
+ 
+-        msg_info() << "EulerImplicitSolver, f = " << f;
++            msg_info() << "EulerImplicitSolver, f = " << f;
+ 
+-        // add the change of force due to stiffness + Rayleigh damping
+-        mop.addMBKv(b, -f_rayleighMass.getValue(), 1, h+f_rayleighStiffness.getValue()); // b =  f0 + ( rm M + B + (h+rs) K ) v
++            // add the change of force due to stiffness + Rayleigh damping
++            mop.addMBKv(b, -f_rayleighMass.getValue(), 1, h+f_rayleighStiffness.getValue()); // b =  f0 + ( rm M + B + (h+rs) K ) v
+ 
+-        // integration over a time step
+-        b.teq(h*tr);                                                                        // b = h(f0 + ( rm M + B + (h+rs) K ) v )
+-    }
++            // integration over a time step
++            b.teq(h*tr);                                                                        // b = h(f0 + ( rm M + B + (h+rs) K ) v )
++        }
+ 
+-    msg_info() << "EulerImplicitSolver, b = " << b;
++        msg_info() << "EulerImplicitSolver, b = " << b;
+ 
+-    mop.projectResponse(b);          // b is projected to the constrained space
++        mop.projectResponse(b);          // b is projected to the constrained space
+ 
+-    msg_info() << "EulerImplicitSolver, projected b = " << b;
++        msg_info() << "EulerImplicitSolver, projected b = " << b;
++    }
++    core::behavior::MultiMatrix<simulation::common::MechanicalOperations> matrix(&mop);
+ 
+-    sofa::helper::AdvancedTimer::stepNext ("ComputeRHTerm", "MBKBuild");
++    {
++        SCOPED_TIMER("setSystemMBKMatrix");
+ 
+-    core::behavior::MultiMatrix<simulation::common::MechanicalOperations> matrix(&mop);
+ 
+-    if (firstOrder)
+-        matrix.setSystemMBKMatrix(MechanicalMatrix(1,0,-h*tr)); //MechanicalMatrix::K * (-h*tr) + MechanicalMatrix::M;
+-    else
+-        matrix.setSystemMBKMatrix(MechanicalMatrix(1+tr*h*f_rayleighMass.getValue(),-tr*h,-tr*h*(h+f_rayleighStiffness.getValue()))); // MechanicalMatrix::K * (-tr*h*(h+f_rayleighStiffness.getValue())) + MechanicalMatrix::B * (-tr*h) + MechanicalMatrix::M * (1+tr*h*f_rayleighMass.getValue());
++        if (firstOrder)
++            matrix.setSystemMBKMatrix(MechanicalMatrix(1,0,-h*tr)); //MechanicalMatrix::K * (-h*tr) + MechanicalMatrix::M;
++        else
++            matrix.setSystemMBKMatrix(MechanicalMatrix(1+tr*h*f_rayleighMass.getValue(),-tr*h,-tr*h*(h+f_rayleighStiffness.getValue()))); // MechanicalMatrix::K * (-tr*h*(h+f_rayleighStiffness.getValue())) + MechanicalMatrix::B * (-tr*h) + MechanicalMatrix::M * (1+tr*h*f_rayleighMass.getValue());
+ 
+-    msg_info() << "EulerImplicitSolver, matrix = " << (MechanicalMatrix::K * (-h * (h + f_rayleighStiffness.getValue())) + MechanicalMatrix::M * (1 + h * f_rayleighMass.getValue())) << " = " << matrix;
+-    msg_info() << "EulerImplicitSolver, Matrix K = " << MechanicalMatrix::K;
++        msg_info() << "EulerImplicitSolver, matrix = " << (MechanicalMatrix::K * (-h * (h + f_rayleighStiffness.getValue())) + MechanicalMatrix::M * (1 + h * f_rayleighMass.getValue())) << " = " << matrix;
++        msg_info() << "EulerImplicitSolver, Matrix K = " << MechanicalMatrix::K;
+ 
+-#ifdef SOFA_DUMP_VISITOR_INFO
+-    simulation::Visitor::printNode("SystemSolution");
+-#endif
+-    sofa::helper::AdvancedTimer::stepEnd ("MBKBuild");
++    #ifdef SOFA_DUMP_VISITOR_INFO
++        simulation::Visitor::printNode("SystemSolution");
++    #endif
++    }
+     {
+         SCOPED_TIMER("MBKSolve");
+         matrix.solve(x, b); //Call to ODE resolution: x is the solution of the system}
+diff --git a/Sofa/framework/Config/CMakeLists.txt b/Sofa/framework/Config/CMakeLists.txt
+index 2e58f601a7..f19bbd0a22 100644
+--- a/Sofa/framework/Config/CMakeLists.txt
++++ b/Sofa/framework/Config/CMakeLists.txt
+@@ -244,7 +244,7 @@ endif()
+ ## Tracy
+ option(SOFA_TRACY "Compile SOFA with the Tracy profiler client" OFF)
+ if (SOFA_TRACY)
+-    set(SOFA_TRACY_VERSION v0.9.1)
++    set(SOFA_TRACY_VERSION v0.11.1)
+     include(FetchContent)
+     option(TRACY_STATIC "Whether to build Tracy as a static library" OFF)
+     FetchContent_Declare (
+diff --git a/examples/Component/Constraint/Lagrangian/BilateralInteractionConstraint_NNCG.scn b/examples/Component/Constraint/Lagrangian/BilateralLagrangianConstraint_NNCG.scn
+similarity index 100%
+rename from examples/Component/Constraint/Lagrangian/BilateralInteractionConstraint_NNCG.scn
+rename to examples/Component/Constraint/Lagrangian/BilateralLagrangianConstraint_NNCG.scn
+diff --git a/examples/Component/Constraint/Lagrangian/BilateralInteractionConstraint_PGS.scn b/examples/Component/Constraint/Lagrangian/BilateralLagrangianConstraint_PGS.scn
+similarity index 100%
+rename from examples/Component/Constraint/Lagrangian/BilateralInteractionConstraint_PGS.scn
+rename to examples/Component/Constraint/Lagrangian/BilateralLagrangianConstraint_PGS.scn
+diff --git a/examples/Component/Constraint/Lagrangian/BilateralInteractionConstraint_UGS.scn b/examples/Component/Constraint/Lagrangian/BilateralLagrangianConstraint_UGS.scn
+similarity index 100%
+rename from examples/Component/Constraint/Lagrangian/BilateralInteractionConstraint_UGS.scn
+rename to examples/Component/Constraint/Lagrangian/BilateralLagrangianConstraint_UGS.scn
+diff --git a/examples/Component/Constraint/Projective/FixedConstraint.scn b/examples/Component/Constraint/Projective/FixedProjectiveConstraint.scn
+similarity index 100%
+rename from examples/Component/Constraint/Projective/FixedConstraint.scn
+rename to examples/Component/Constraint/Projective/FixedProjectiveConstraint.scn
