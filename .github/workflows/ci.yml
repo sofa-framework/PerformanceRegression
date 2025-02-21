@@ -47,8 +47,8 @@ jobs:
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
-            https://api.github.com/repos/sofa-framework/sofa/statuses/${{ inputs.commit_hash }} \
-            -d '{"state":"pending","target_url":"https://github.com/sofa-framework/PerformanceRegression/actions/runs/${{ github.run_id }}","description":"Performance testing started...","context":"performance-tests"}'
+            https://api.github.com/repos/sofa-framework/sofa/statuses/${TEST_COMMIT_HASH} \
+            -d '{"state":"pending","target_url":"https://github.com/sofa-framework/PerformanceRegression/actions/runs/${{ github.run_id }}","description":"Performance tests started...","context":"performance-tests"}'
 
       - name: Run performance tests
         id: run_perf_tests
@@ -86,8 +86,8 @@ jobs:
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
-            https://api.github.com/repos/sofa-framework/sofa/statuses/${{ inputs.commit_hash }} \
-            -d '{"state":"${STATE}","target_url":"https://github.com/sofa-framework/PerformanceRegression/actions/runs/${{ github.run_id }}","description":"Performance testing started...","context":"performance-tests"}'
+            https://api.github.com/repos/sofa-framework/sofa/statuses/${TEST_COMMIT_HASH} \
+            -d '{"state":"${STATE}","target_url":"https://github.com/sofa-framework/PerformanceRegression/actions/runs/${{ github.run_id }}","description":"Performance tests completed","context":"performance-tests"}'
 
       - name: Push results
         if: steps.run_perf_tests.outcome == 'success'
