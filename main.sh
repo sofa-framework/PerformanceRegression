@@ -73,8 +73,8 @@ fi
 
 
 # Add informations to Log
-lshw > hardware.log
-apt --installed list > software.log
+lshw > $WORK_DIR/hardware.log
+apt --installed list > $WORK_DIR/software.log
 
 
 ##### GENERATE DATA #####
@@ -111,5 +111,5 @@ echo "Calling '$SCRIPT_DIR/generate_results/save-results.sh $WORK_DIR $SCRIPT_DI
 echo ""
 
 # Add informations to Log
-env | grep PR > env.log
+env | grep PR_ > $WORK_DIR/env.log
 

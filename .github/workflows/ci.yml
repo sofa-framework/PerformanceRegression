@@ -67,7 +67,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4.4.0
         with:
-          name: ${{ inputs.branch }}_${{ inputs.commit_hash }}
+          name: action_logs
           path: logs
 
       - name: Notify commit end
