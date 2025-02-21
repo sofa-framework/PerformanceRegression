@@ -71,6 +71,12 @@ if [[ -z "${RO_GITHUB_TOKEN}" ]]; then
     exit 1
 fi
 
+
+# Add informations to Log
+lshw > hardware.log
+apt --installed list > software.log
+
+
 ##### GENERATE DATA #####
 # Setup action (clone + build sofa)
 echo "Calling '$SCRIPT_DIR/setup_action/action-setup.sh "$WORK_DIR" $BRANCH $HASH'"
@@ -89,7 +95,7 @@ echo ""
 
 ##### GENERATE STATISTICS #####
 echo "Processing CSV files to compute statistics..."
-echo "Calling 'python3 $SCRIPT_DIR/generate_statistics/process_csv.py $WORK_DIR $PR_SETUP_SOFA_SOURCES $SCRIPT_DIR/perf.scenes $SCRIPT_DIR/default.timers $SCRIPT_DIR/freemotion.timers $PR_RUN_SCENES_OUTPUT_DIR $PR_EXTRACT_RESULTS_OUTPUT_DIR $PR_SETUP_FULL_HASH $BRANCH HIDDEN_RO_GITHUB_TOKEN  > $WORK_DIR/process_csv.log 2>&1 '"
+echo "Calling 'python3 $SCRIPT_DIR/generate_statistics/process_csv.py $WORK_DIR $PR_SETUP_SOFA_SOURCES $SCRIPT_DIR/perf.scenes $SCRIPT_DIR/default.timers $SCRIPT_DIR/freemotion.timers $PR_RUN_SCENES_OUTPUT_DIR $PR_EXTRACT_RESULTS_OUTPUT_DIR $PR_SETUP_FULL_HASH $BRANCH HIDDEN_RO_GITHUB_TOKEN  > process_csv.log 2>&1 '"
 python3 $SCRIPT_DIR/generate_statistics/process_csv.py "$WORK_DIR" "$PR_SETUP_SOFA_SOURCES" "$SCRIPT_DIR/perf.scenes" "$SCRIPT_DIR/default.timers" "$SCRIPT_DIR/freemotion.timers" "$PR_RUN_SCENES_OUTPUT_DIR" "$PR_EXTRACT_RESULTS_OUTPUT_DIR" "$PR_SETUP_FULL_HASH" "$BRANCH" "$RO_GITHUB_TOKEN" > $WORK_DIR/process_csv.log 2>&1
 echo "CSV files processed ! Stats are saved in file $PR_RUN_SCENES_OUTPUT_DIR/$PR_SETUP_FULL_HASH.csv"
 echo ""
@@ -104,23 +110,6 @@ echo "Calling '$SCRIPT_DIR/generate_results/save-results.sh $WORK_DIR $SCRIPT_DI
 . $SCRIPT_DIR/generate_results/save-results.sh "$WORK_DIR" "$SCRIPT_DIR" "$PR_RUN_SCENES_OUTPUT_DIR" "$PR_SETUP_FULL_HASH"
 echo ""
 
-
-# Move logs around to zip
-LOGS_DIR=$WORK_DIR/logs
-mkdir $LOGS_DIR
-mkdir $LOGS_DIR/OS_INFO
-mkdir $LOGS_DIR/SCENE_OUTPUT
-mkdir $LOGS_DIR/RESULTS
-
-lshw > $LOGS_DIR/hardware.log
-apt --installed list > $LOGS_DIR/software.log
-env | grep PR > $LOGS_DIR/env.log
-
-# Move actual logs
-mv $WORK_DIR/*.log $LOGS_DIR || true
-mv $PR_RUN_SCENES_OUTPUT_DIR/*_OS_info.log $LOGS_DIR/OS_INFO || true
-mv $PR_RUN_SCENES_OUTPUT_DIR/*.log $LOGS_DIR/SCENE_OUTPUT || true
-
-# Move results in log folder
-cp $PR_RUN_SCENES_OUTPUT_DIR/${PR_SETUP_FULL_HASH}* $LOGS_DIR/RESULTS || true
+# Add informations to Log
+env | grep PR > env.log
 
