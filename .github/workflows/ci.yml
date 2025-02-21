@@ -58,6 +58,12 @@ jobs:
           export RO_GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
           bash ./PerformanceRegression/main.sh $(pwd) $TEST_BRANCH $TEST_COMMIT_HASH
 
+      - name: Move logs around to save them
+        shell: bash
+        run: |
+          mkdir logs
+          find . -name \*.log -exec cp --parents {} logs \;
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v4.4.0
         with:

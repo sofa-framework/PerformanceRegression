@@ -30,7 +30,7 @@ mkdir build
 BUILD_DIR=$WORK_DIR/build
 
 #Clone SOFA 
-echo "Cloning sofa branch $BRANCH at sha $HASH into folder $WORK_DIR/sofa... Logs can be found there : $WORK_DIR/git.log"
+echo "Cloning sofa branch $BRANCH at sha $HASH into folder $WORK_DIR/sofa... Logs can be found there : git.log"
 
 git clone -b $BRANCH --single-branch https://www.github.com/sofa-framework/sofa >> $WORK_DIR/git.log 2>&1
 SOURCE_DIR=$WORK_DIR/sofa
@@ -59,7 +59,7 @@ echo ""
 
 #setup build
 echo "Setuping SOFA cmake into folder $BUILD_DIR..."
-echo "Logs can be found there : $WORK_DIR/cmake.log"
+echo "Logs can be found there : cmake.log"
 
 cd $BUILD_DIR 
 cmake $SOURCE_DIR -GNinja -DCMAKE_BUILD_TYPE=Release \
@@ -75,7 +75,7 @@ echo ""
 
 #build
 echo "Building SOFA..."
-echo "Logs can be found there : $WORK_DIR/compilation.log"
+echo "Logs can be found there : compilation.log"
 
 ninja > $WORK_DIR/compilation.log 2>&1 
 
