@@ -7,8 +7,8 @@ Machine:
 CPU:
   Info: quad core model: Intel Core i7-4790K bits: 64 type: MT MCP arch: Haswell rev: 3 cache:
     L1: 256 KiB L2: 1024 KiB L3: 8 MiB
-  Speed (MHz): avg: 2311 high: 4400 min/max: 800/4400 cores: 1: 3600 2: 800 3: 2900 4: 800
-    5: 4400 6: 4395 7: 800 8: 800 bogomips: 63997
+  Speed (MHz): avg: 2857 high: 4400 min/max: 800/4400 cores: 1: 3000 2: 800 3: 800 4: 4397
+    5: 4400 6: 4330 7: 4336 8: 800 bogomips: 63997
   Flags: avx avx2 ht lm nx pae sse sse2 sse3 sse4_1 sse4_2 ssse3 vmx
 Graphics:
   Device-1: Intel Xeon E3-1200 v3/4th Gen Core Processor Integrated Graphics vendor: Micro-Star MSI
@@ -30,6 +30,6 @@ Network:
 Drives:
   Local Storage: total: 2.05 TiB used: 18.55 GiB (0.9%)
 Info:
-  Memory: total: 16 GiB available: 15.51 GiB used: 1.9 GiB (12.2%)
-  Processes: 283 Uptime: 3d 33m Init: systemd target: graphical (5)
+  Memory: total: 16 GiB available: 15.51 GiB used: 1.96 GiB (12.6%)
+  Processes: 281 Uptime: 3d 3h 9m Init: systemd target: graphical (5)
   Packages: 2028 Compilers: gcc: 13.3.0 Client: shell wrapper v: 5.2.21-release inxi: 3.3.34
