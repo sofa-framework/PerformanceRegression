@@ -12,11 +12,13 @@ class FullStatSnap():
         minmax : tuple[float,float]
         meanstd : tuple[float,float]
         quartiles : tuple[float,float,float]
+        cardinality : int
 
-        def __init__(self, minmax:tuple[float,float], meanstd:tuple[float,float], quartiles:tuple[float,float,float]):
+        def __init__(self, minmax:tuple[float,float], meanstd:tuple[float,float], quartiles:tuple[float,float,float], cardinality:int):
             self.minmax       = minmax
             self.meanstd      = meanstd
             self.quartiles    = quartiles
+            self.cardinality    = cardinality
             pass
 
     fullHash : str                        # Either the hash or the release version
@@ -94,20 +96,21 @@ def loadCSVStatistic(filename):
         # First line of CSV contains labels
         if firstLine:
             firstLine = False
-            # We expect labels to be sorted this way : label_min,label_max,label_mean,label_std,label_quartile1,label_quartile2,label_quartile3
+            # We expect labels to be sorted this way : label_min,label_max,label_mean,label_std,label_quartile1,label_quartile2,label_quartile3,cardinality
             # See method computeSingleData in generate_statistics/methods.py
             # POTENTIAL TODO: Make this parametrizable in a parameter file to avoid weak link like that.
-            labels = [row[1 + i*7].split('_')[0] for i in range(len(row)//7)]
+            labels = [row[1 + i*8].split('_')[0] for i in range(len(row)//8)]
 
         else:
             samples = []
             sceneLabels = []
-            for i in range(len(row)//7):
-                if( not row[1 + i*7 + 0] == "NaN" ):
+            for i in range(len(row)//8):
+                if( not row[1 + i*8 + 0] == "NaN" ):
                     sceneLabels.append(labels[i])
-                    samples.append(FullStatSnap.DataSample( (float(row[1 + i*7 + 0]),float(row[1 + i*7 + 1])),
-                                                           (float(row[1 + i*7 + 2]),float(row[1 + i*7 + 3])),
-                                                           (float(row[1 + i*7 + 4]),float(row[1 + i*7 + 5]),float(row[1 + i*7 + 6]))))
+                    samples.append(FullStatSnap.DataSample( (float(row[1 + i*8 + 0]),float(row[1 + i*8 + 1])),
+                                                           (float(row[1 + i*8 + 2]),float(row[1 + i*8 + 3])),
+                                                           (float(row[1 + i*8 + 4]),float(row[1 + i*8 + 5]),float(row[1 + i*8 + 6])),
+                                                            (int(row[1 + i*8 + 7]))))
 
             outputMap.addScene(sceneName,sceneLabels,samples)
 
@@ -234,6 +237,22 @@ def findCommitId(data : list[FullStatSnap], hash:str):
         if(data[i].fullHash == hash):
             return i
     return -1
+
+
+def getTimerData(data : list[FullStatSnap], hash:str, sceneName:str, timerName:str):
+
+    try:
+        releaseId = findCommitId(data,hash)
+
+        sceneIndex = data[releaseId].sceneNames.index(sceneName)
+        dataIndex = data[releaseId].timerNames.index(timerName)
+        dataIndexInSamples = data[releaseId].sceneTimers[sceneIndex].index(dataIndex)
+        dataStruct = data[releaseId].sceneSamples[sceneIndex][dataIndexInSamples]
+
+    except(ValueError):
+        return None
+
+    return dataStruct
 
 # Method: getDataStructureForGraph
 # Here the idea is to sort data to be used in box plots.

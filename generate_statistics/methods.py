@@ -68,8 +68,8 @@ def isFreeMotionAL(tracyData):
 def computeSingleData(rawData, applyDivisor = 1):
     # rawData is a np array containing time values at each time step for each execution
     percentiles = np.percentile(rawData,[25,50,75])
-    # Return vector is constituted this way : [min, max, mean, std, first quartile, second quartile, third quartile]
-    return [np.min(rawData)/applyDivisor, np.max(rawData)/applyDivisor, np.mean(rawData)/applyDivisor, np.std(rawData)/applyDivisor, percentiles[0]/applyDivisor, percentiles[1]/applyDivisor, percentiles[2]/applyDivisor]
+    # Return vector is constituted this way : [min, max, mean, std, first quartile, second quartile, third quartile, number of samples]
+    return [np.min(rawData)/applyDivisor, np.max(rawData)/applyDivisor, np.mean(rawData)/applyDivisor, np.std(rawData)/applyDivisor, percentiles[0]/applyDivisor, percentiles[1]/applyDivisor, percentiles[2]/applyDivisor, len(rawData)]
 
 def loadTimerFile(timersFile):
     # Output file looks like that : 
@@ -145,7 +145,7 @@ def processFile(tracyData,timers,sceneName="default"):
 
 def exportToCSV(processedData,outputfile,timersDicts):
     ### IMPORTANT must be kept coherant with what is done in computeSingleData
-    dataOrder = ["min","max","mean","std","quartile1","quartile2","quartile3"]
+    dataOrder = ["min","max","mean","std","quartile1","quartile2","quartile3","cardinality"]
 
     #Create a unique list of all timers labels for the columns names (merging labels from all simulations)
     uniqueLabels = []
