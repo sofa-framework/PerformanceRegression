@@ -12,11 +12,13 @@ class FullStatSnap():
         minmax : tuple[float,float]
         meanstd : tuple[float,float]
         quartiles : tuple[float,float,float]
+        cardinality : int
 
-        def __init__(self, minmax:tuple[float,float], meanstd:tuple[float,float], quartiles:tuple[float,float,float]):
+        def __init__(self, minmax:tuple[float,float], meanstd:tuple[float,float], quartiles:tuple[float,float,float], cardinality:int):
             self.minmax       = minmax
             self.meanstd      = meanstd
             self.quartiles    = quartiles
+            self.cardinality    = cardinality
             pass
 
     fullHash : str                        # Either the hash or the release version
@@ -107,7 +109,8 @@ def loadCSVStatistic(filename):
                     sceneLabels.append(labels[i])
                     samples.append(FullStatSnap.DataSample( (float(row[1 + i*7 + 0]),float(row[1 + i*7 + 1])),
                                                            (float(row[1 + i*7 + 2]),float(row[1 + i*7 + 3])),
-                                                           (float(row[1 + i*7 + 4]),float(row[1 + i*7 + 5]),float(row[1 + i*7 + 6]))))
+                                                           (float(row[1 + i*7 + 4]),float(row[1 + i*7 + 5]),float(row[1 + i*7 + 6])),
+                                                            (int(row[1 + i*7 + 7]))))
 
             outputMap.addScene(sceneName,sceneLabels,samples)
 
