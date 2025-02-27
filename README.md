@@ -68,3 +68,6 @@ Dependencies depends on how you run it:
 1. If runing through python3, you'll need to install all the dependencies in the file `dashboard/docker/requirements.txt` by calling `python3 -m pip install -r requirements.txt`, you can skip `gunicorn`.
 2. If runing through docker, you'll need docker desktop and docker compose. See https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository
 
+For both:
+*env:*
+- RO_GITHUB_TOKEN: a read only github token
