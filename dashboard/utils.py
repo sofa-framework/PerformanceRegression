@@ -238,6 +238,22 @@ def findCommitId(data : list[FullStatSnap], hash:str):
             return i
     return -1
 
+
+def getTimerData(data : list[FullStatSnap], hash:str, sceneName:str, timerName:str):
+
+    try:
+        releaseId = findCommitId(data,hash)
+
+        sceneIndex = data[releaseId].sceneNames.index(sceneName)
+        dataIndex = data[releaseId].timerNames.index(timerName)
+        dataIndexInSamples = data[releaseId].sceneTimers[sceneIndex].index(dataIndex)
+        dataStruct = data[releaseId].sceneSamples[sceneIndex][dataIndexInSamples]
+
+    except(ValueError):
+        return None
+
+    return dataStruct
+
 # Method: getDataStructureForGraph
 # Here the idea is to sort data to be used in box plots.
 #

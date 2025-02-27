@@ -341,29 +341,21 @@ def get_commit_info_data_for_callback(commitHash,sceneName,timerName):
     commit = sofaRepo.get_commit(commitHash)
     commitRawData = commit.raw_data
 
-    try:
-        if(isRelease):
-            releaseId = utils.findCommitId(releaseData,commitHash)
+    #NO copy is actually done because we are using lists
+    if(isRelease):
+        data = releaseData
+    else:
+        data = commitData
 
-            sceneIndex = releaseData[releaseId].sceneNames.index(sceneName)
-            cpuIndex = releaseData[releaseId].timerNames.index("CPUUsage")
-            cpuIndexInSamples = releaseData[releaseId].sceneTimers[sceneIndex].index(cpuIndex)
-            cpuData = releaseData[releaseId].sceneSamples[sceneIndex][cpuIndexInSamples]
-            timerIndex = releaseData[releaseId].timerNames.index(timerName)
-            timerIndexInSamples = releaseData[releaseId].sceneTimers[sceneIndex].index(timerIndex)
-            timerCardinality = releaseData[releaseId].sceneSamples[sceneIndex][timerIndexInSamples].cardinality
-        else:
-            commitId = utils.findCommitId(commitData,commit.sha)
+    cpuData = utils.getTimerData(data,commitHash,sceneName, "CPUUsage")
+    timerData = utils.getTimerData(data,commitHash,sceneName, timerName)
 
-            sceneIndex = commitData[commitId].sceneNames.index(sceneName)
-            cpuIndex = commitData[commitId].timerNames.index("CPUUsage")
-            cpuIndexInSamples = commitData[commitId].sceneTimers[sceneIndex].index(cpuIndex)
-            cpuData = commitData[commitId].sceneSamples[sceneIndex][cpuIndexInSamples]
+    if(timerData is not None):
+        timerCardinality = timerData.cardinality
+    else:
+        timerCardinality = -1
 
-            timerIndex = commitData[commitId].timerNames.index(timerName)
-            timerIndexInSamples = commitData[commitId].sceneTimers[sceneIndex].index(timerIndex)
-            timerCardinality = commitData[commitId].sceneSamples[sceneIndex][timerIndexInSamples].cardinality
-
+    if(cpuData is not None):
         CpuString = f"CPU Usage : {cpuData.meanstd[0]:.2f}% ± {2*cpuData.meanstd[1]:.2f} (5% confidence)"
         if((cpuData.meanstd[0] + 2*cpuData.meanstd[1]) <= 5):
             CpuColor = '#21b239'
@@ -371,11 +363,10 @@ def get_commit_info_data_for_callback(commitHash,sceneName,timerName):
             CpuColor = "#eb9a2d"
         else:
             CpuColor = "#ff2222"
-
-
-    except(ValueError):
+    else:
         CpuString = "CPU Usage : no stat found"
         CpuColor = "#BBBBBB"
+
 
     currCommitInfo = [
         html.P(["Commit hash : ",html.B(f"{commitHash}")], className="text-secondary"),
@@ -741,18 +732,16 @@ def update_timer_graph(currFig,git_data_type,commit_since,commit_interval,labels
     Output(component_id='commit-info', component_property='children',allow_duplicate=True),
     State(component_id='commit-info', component_property='children'),
     Input(component_id='PlotTimerSpecific', component_property='clickData'),
+    State(component_id='PlotTimerSpecific', component_property='figure'),
     State(component_id='sceneName', component_property='value'),
-    State(component_id='labels', component_property='value'),
     prevent_initial_call=True)
-def display_click_commit_info_data_from_timer(currCommitInfo,clickData,sceneName,labels):
+def display_click_commit_info_data_from_timer(currCommitInfo,clickData,figure,sceneName):
 
     if(clickData is not None):
         commitName = clickData['points'][0]['x']
-        timerLabel = labels[clickData['points'][0]['curveNumber']]
+        timerName = figure['data'][clickData['points'][0]['curveNumber']]['name']
 
-        print(timerLabel)
-
-        commitInfo = get_commit_info_data_for_callback(commitName,sceneName,timerLabel)
+        commitInfo = get_commit_info_data_for_callback(commitName,sceneName,timerName)
         stats = html.P([html.B("Statistics"),
                         html.P([
                             f"Min : {clickData['points'][0]['lowerfence']:.4f}",html.Br(),
