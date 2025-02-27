@@ -457,6 +457,8 @@ def update_scene_checked_for_timers(sceneNames,selectAll):
         return sceneNames
     else:
         return []
+
+
 @callback(
     Output(component_id='PlotOverview', component_property='figure'),
     State(component_id='PlotOverview', component_property='figure'),
