@@ -291,7 +291,7 @@ def getDataStructureForGraph(data : list[FullStatSnap], ids : list[int], sceneNa
 
             currfullHash = data[id].fullHash
             if(len(currfullHash)>7):
-                currfullHash = currfullHash[:6]
+                currfullHash = currfullHash[:7]
 
             xLabelList[label].append(currfullHash)
             labelIdInSceneLabelList.append(currLabelIdInSceneLabelList)
