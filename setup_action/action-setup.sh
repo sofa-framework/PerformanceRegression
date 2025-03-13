@@ -69,6 +69,7 @@ cmake $SOURCE_DIR -GNinja -DCMAKE_BUILD_TYPE=Release \
                   -DSOFA_FETCH_SOFAGLFW=OFF -DPLUGIN_MULTITHREADING=ON \
                   -DSOFA_FETCH_CSPARSESOLVERS=ON -DSOFA_FETCH_SOFA_METIS=ON \
                   -DPLUGIN_CSPARSESOLVERS=ON -DPLUGIN_SOFA_METIS=ON \
+                  -DSOFA_FETCH_BEAMADAPTER=ON -DPLUGIN_BEAMADAPTER=ON \
                   > $WORK_DIR/cmake.log 2>&1
 echo "Done !"
 echo ""
