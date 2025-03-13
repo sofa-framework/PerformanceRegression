@@ -1,4 +1,5 @@
 examples/Demos/fallingBeamLagrangianCollision.scn 50 100 5
+examples/Demos/SofaScene.scn 50 400 5
 examples/Component/Constraint/Lagrangian/BilateralLagrangianConstraint_NNCG.scn 1 200 5
 examples/Component/Constraint/Lagrangian/BilateralLagrangianConstraint_PGS.scn 1 200 5
 examples/Component/Constraint/Lagrangian/BilateralLagrangianConstraint_UGS.scn 1 200 5
