@@ -234,7 +234,7 @@ def computeCommitListIdInDataList(data : list[FullStatSnap], sortedIdx : list[in
 
 def findCommitId(data : list[FullStatSnap], hash:str):
     for i in range(len(data)):
-        if(data[i].fullHash == hash):
+        if(data[i].fullHash[:len(hash)] == hash):
             return i
     return -1
 
@@ -243,7 +243,6 @@ def getTimerData(data : list[FullStatSnap], hash:str, sceneName:str, timerName:s
 
     try:
         releaseId = findCommitId(data,hash)
-
         sceneIndex = data[releaseId].sceneNames.index(sceneName)
         dataIndex = data[releaseId].timerNames.index(timerName)
         dataIndexInSamples = data[releaseId].sceneTimers[sceneIndex].index(dataIndex)
