@@ -1,0 +1,32 @@
+System:
+  Kernel: 6.14.0-32-generic arch: x86_64 bits: 64 compiler: gcc v: 13.3.0
+  Console: N/A Distro: Ubuntu 24.04 LTS (Noble Numbat)
+Machine:
+  Type: Desktop Mobo: MSI model: H97I AC (MS-7851) v: 1.0 serial: <superuser required>
+    UEFI: American Megatrends v: 5.7 date: 06/02/2015
+CPU:
+  Info: quad core model: Intel Core i7-4790K bits: 64 type: MT MCP arch: Haswell rev: 3 cache:
+    L1: 256 KiB L2: 1024 KiB L3: 8 MiB
+  Speed (MHz): avg: 2073 high: 4399 min/max: 800/4400 cores: 1: 3810 2: 800 3: 800 4: 4399 5: 800
+    6: 800 7: 800 8: 4376 bogomips: 63995
+  Flags: avx avx2 ht lm nx pae sse sse2 sse3 sse4_1 sse4_2 ssse3 vmx
+Graphics:
+  Device-1: Intel Xeon E3-1200 v3/4th Gen Core Processor Integrated Graphics vendor: Micro-Star MSI
+    driver: N/A arch: Gen-7.5 bus-ID: 00:02.0
+  Device-2: NVIDIA GM206 [GeForce GTX 960] vendor: Micro-Star MSI driver: N/A arch: Maxwell
+    bus-ID: 01:00.0
+  Display: server: X.org v: 1.21.1.11 with: Xwayland v: 23.2.6 driver: X: loaded: nouveau
+    unloaded: fbdev,modesetting,vesa gpu: N/A tty: 80x40
+  API: EGL Message: No EGL data available.
+Network:
+  Device-1: Realtek RTL8111/8168/8211/8411 PCI Express Gigabit Ethernet vendor: Micro-Star MSI
+    RTL8111/8168/8411 driver: r8169 v: kernel port: d000 bus-ID: 03:00.0
+  IF: enp3s0 state: up speed: 1000 Mbps duplex: full mac: <filter>
+  Device-2: Intel Wireless 7260 driver: iwlwifi v: kernel bus-ID: 04:00.0
+  IF: wlp4s0 state: down mac: <filter>
+Drives:
+  Local Storage: total: 2.05 TiB used: 32.24 GiB (1.5%)
+Info:
+  Memory: total: 16 GiB available: 15.52 GiB used: 3.02 GiB (19.4%)
+  Processes: 197 Uptime: 123d 18h 35m Init: systemd target: graphical (5)
+  Packages: 2102 Compilers: gcc: 13.3.0 Client: shell wrapper v: 5.2.21-release inxi: 3.3.34
