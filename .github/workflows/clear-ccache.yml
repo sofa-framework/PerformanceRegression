@@ -1,0 +1,22 @@
+name: Clear ccache
+
+# ===============================================================
+# ===============================================================
+
+
+on:
+  # On-demand binary generation
+  workflow_dispatch:
+
+jobs:
+  # Filter build handling : push in master, commits in PR, comments in PR and dispatch
+  clear_ccache_by_hand:
+    strategy:
+      fail-fast: false
+    runs-on: self-hosted
+    steps:
+      - name: Clear ccache 
+        shell: bash
+        run: |
+            ccache --clear  
+                 
