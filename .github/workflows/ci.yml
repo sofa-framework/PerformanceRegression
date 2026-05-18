@@ -12,7 +12,7 @@ on:
           default: 'master'
           type: string
         commit_hash:
-          description: 'Commit hash on the branch, if not specified thent he latest is taken'
+          description: 'Commit hash on the branch, if not specified then the latest is taken'
           required: false
           type: string
   repository_dispatch:
