@@ -30,3 +30,4 @@ examples/Benchmark/Performance/MatrixAssembly/MatrixAssembly_matrixfreeCG.scn 1 
 examples/Component/SolidMechanics/FEM/FastTetrahedralCorotationalForceField.scn 1 200 5
 examples/Component/SolidMechanics/FEM/HexahedronFEMForceField.scn 1 200 5
 examples/Component/SolidMechanics/FEM/TetrahedronFEMForceField.scn 1 200 5
+examples/Benchmark/Performance/TorusFall.scn 1 200 5
